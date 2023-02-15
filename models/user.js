@@ -58,13 +58,19 @@ var userSchema = new mongoose.Schema(
 );
 
 userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) { //neu pasword khong thay doi thi isModified tra ve false va nguoc lai
+  if (!this.isModified("password")) {
+    //neu pasword khong thay doi thi isModified tra ve false va nguoc lai
     next(); // giong return thi out khoi dk tren chay code tiep theo
   }
   const salt = bcrypt.genSaltSync(10);
   this.password = await bcrypt.hash(this.password, salt);
 });
 
+userSchema.methods = {
+  isCorrectPassword: async function (password) {
+    return await bcrypt.compare(password, this.password); //Ham nay tra ve true or false vd neu password = this.password trung nhau se tra ve true va nguoc lai
+  },
+};
 
 //Export the model
 module.exports = mongoose.model("User", userSchema);
